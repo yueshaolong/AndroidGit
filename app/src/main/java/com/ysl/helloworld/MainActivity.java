@@ -3,6 +3,7 @@ package com.ysl.helloworld;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,6 +13,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import java.util.Arrays;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.subjects.Subject;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -96,5 +111,110 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+    public static void observer(){
+        Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(ObservableEmitter<String> emitter) throws Exception {
+                emitter.onNext("hahads");
+                emitter.onComplete();
+            }
+        }).subscribe(/*new Observer<String>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onNext(String s) {
+                System.out.println("onNext : " + s );
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+                System.out.println("onNext : onComplete" );
+            }
+        }*/
+                new Subject<String>() {
+                    @Override
+                    public boolean hasObservers() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean hasThrowable() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean hasComplete() {
+                        return false;
+                    }
+
+                    @Override
+                    public Throwable getThrowable() {
+                        return null;
+                    }
+
+                    @Override
+                    protected void subscribeActual(Observer<? super String> observer) {
+
+                    }
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(String s) {
+                        System.out.println("onNext : " + s );
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        System.out.println("onNext : onComplete" );
+                    }
+                });
+    }
+
+    public static void main(String[] args) {
+
+        myMap();
+
+    }
+
+    private static void myMap() {
+
+    }
+
+    private static void fromJust() {
+        String[] names = new String[]{"a","b","c"};
+        Observable.fromArray(names)
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String s) throws Exception {
+                        System.out.print("onNext : fromArray : " + s + "\n");
+                    }
+                });
+        Observable.just(names)
+                .subscribe(new Consumer<String[]>() {
+                    @Override
+                    public void accept(String[] strings) throws Exception {
+                        System.out.print("onNext : just : " + Arrays.toString(strings) + "\n");
+                    }
+                });
     }
 }
