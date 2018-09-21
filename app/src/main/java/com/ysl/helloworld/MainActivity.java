@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.jakewharton.rxbinding2.view.RxView;
+import com.ysl.Gank.GankRequest;
 import com.ysl.retrofit.GetRequest;
 import com.ysl.retrofit.PostRequest;
 
@@ -220,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public static void main(String[] args) {
+        new GankRequest().request();
     }
 
     private static void request() {
