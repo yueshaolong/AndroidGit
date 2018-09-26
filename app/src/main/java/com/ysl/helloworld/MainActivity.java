@@ -22,9 +22,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.ysl.Gank.GankRequest;
 import com.ysl.netphoto.INetPhoto;
+import com.ysl.netphoto.ParamsBean;
 import com.ysl.netphoto.WeatherDataBean;
 import com.ysl.retrofit.GetRequest;
 import com.ysl.retrofit.PostRequest;
@@ -46,6 +48,9 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.Subject;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -104,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         requestWeather();
+        requestPhoto();
     }
 
     @Override
@@ -190,6 +196,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Map<String, String> params = new HashMap<>();
         params.put("cityname", "武汉");
         params.put("key", "4ea58de8a7573377cec0046f5e2469d5");
+
+        ParamsBean paramsBean = new ParamsBean();
+        paramsBean.setCityname("武汉");
+        paramsBean.setKey("4ea58de8a7573377cec0046f5e2469d5");
+        System.out.println(new Gson().toJson(paramsBean));
+        System.out.println(RequestBody.create(MediaType.parse("application/json; charset=utf-8"),new Gson().toJson(paramsBean)).toString());
+
+        RequestBody requestBody0 = RequestBody.create(MediaType.parse("UTF-8"), "北京");
+        RequestBody requestBody1 = RequestBody.create(MediaType.parse("UTF-8"), "4ea58de8a7573377cec0046f5e2469d5");
+
         new Retrofit.Builder()
                 .baseUrl("http://op.juhe.cn/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -197,13 +213,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .build()
                 .create(INetPhoto.class)
 //                .getWeather("郑州", "4ea58de8a7573377cec0046f5e2469d5")
+//                .getWeather1("北京", "4ea58de8a7573377cec0046f5e2469d5")
 //                .getWeather("4ea58de8a7573377cec0046f5e2469d5")
-                .getWeather(params)
+//                .getWeather(params)
+//                .getWeather()
+//                .getWeather(requestBody0,requestBody1)
+                .getWeather(RequestBody.create(MediaType.parse("application/json; charset=utf-8"),new Gson().toJson(paramsBean)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<WeatherDataBean>() {
                     @Override
                     public void accept(WeatherDataBean weatherDataBean) throws Exception {
+                        System.out.println("---->"+weatherDataBean);
                         ((TextView)findViewById(R.id.tv)).setText(weatherDataBean.getResult().getData().getLife().getInfo().getDaisan().get(1));
                     }
                 });

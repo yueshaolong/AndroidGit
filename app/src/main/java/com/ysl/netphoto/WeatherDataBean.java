@@ -787,4 +787,13 @@ public class WeatherDataBean {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "WeatherDataBean{" +
+                "reason='" + reason + '\'' +
+                ", result=" + result +
+                ", error_code=" + error_code +
+                '}';
+    }
 }

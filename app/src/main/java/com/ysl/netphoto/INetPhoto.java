@@ -1,13 +1,17 @@
 package com.ysl.netphoto;
 
-import com.ysl.netphoto.WeatherDataBean.ResultBean.DataBean.RealtimeBean.WeatherBean;
-
 import java.util.Map;
 
 import io.reactivex.Observable;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
+import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
 
@@ -25,13 +29,38 @@ public interface INetPhoto {
     @GET("u=867852534,1215232602&fm=26&gp=0.jpg")
     Observable<ResponseBody> getCall();
 
-    @GET("onebox/weather/query?")
-    Observable<WeatherDataBean> getWeather(@QueryMap Map<String, String> params);
+
+    @GET("onebox/weather/query?cityname=深圳&key=4ea58de8a7573377cec0046f5e2469d5")
+    Observable<WeatherDataBean> getWeather();
 
     @GET("onebox/weather/query?cityname=深圳")
     Observable<WeatherDataBean> getWeather(@Query("key") String key);
 
+    //@query的作用就相当于拼接字符串：cityname=上海&key=4ea58de8a7573377cec0046f5e2469d5
     @GET("onebox/weather/query?")
     Observable<WeatherDataBean> getWeather(@Query("cityname") String cityname, @Query("key") String key);
 
+    //QueryMap 参数集合
+    @GET("onebox/weather/query?")
+    Observable<WeatherDataBean> getWeather(@QueryMap Map<String, String> params);
+
+    //函数也可以声明为发送form-encoded（表单形式）和multipart（多部分）数据。
+    //当函数有@FormUrlEncoded注解的时候，将会发送form-encoded数据，
+    //每个键-值对都要被含有名字的@Field注解和提供值的对象所标注(这他妈是绕口令吗？)
+    //每个键值对的写法都是用注解@field标识的，表单形式的数据
+    @FormUrlEncoded
+    @POST("onebox/weather/query?")
+    Observable<WeatherDataBean> getWeather1(@Field("cityname") String cityname, @Field("key") String key);
+
+    //可以通过@Body注解指定一个对象作为Http请求的请求体
+    @POST("onebox/weather/query?")//TODO 未测试通过
+    Observable<WeatherDataBean> getWeather(@Body RequestBody requestBody);
+
+    //当函数有@Multipart注解的时候，将会发送multipart数据，
+    // Parts都使用@Part注解进行声明
+    //Multipart parts要使用Retrofit的众多转换器之一或者实现RequestBody来处理自己的序列化。
+    //这个可以用于传文件,可以改变传值的编码，默认utf_8
+    @Multipart
+    @POST("onebox/weather/query?")
+    Observable<WeatherDataBean> getWeather(@Part("cityname") RequestBody requestBody0, @Part("key") RequestBody requestBody1);
 }
