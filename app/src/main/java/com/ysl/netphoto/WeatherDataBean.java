@@ -301,6 +301,13 @@ public class WeatherDataBean {
                     public void setImg(String img) {
                         this.img = img;
                     }
+
+                    @Override
+                    public String toString() {
+                        return "WeatherBean{" +
+                                "info='" + info + '\'' +
+                                '}';
+                    }
                 }
 
                 public static class WindBean {
@@ -347,6 +354,14 @@ public class WeatherDataBean {
                     public void setWindspeed(String windspeed) {
                         this.windspeed = windspeed;
                     }
+                }
+
+                @Override
+                public String toString() {
+                    return "RealtimeBean{" +
+                            "city_name='" + city_name + '\'' +
+                            ", weather=" + weather +
+                            '}';
                 }
             }
 
@@ -785,15 +800,27 @@ public class WeatherDataBean {
                     }
                 }
             }
+
+            @Override
+            public String toString() {
+                return "DataBean{" +
+                        "realtime=" + realtime +
+                        '}';
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "ResultBean{" +
+                    "data=" + data +
+                    '}';
         }
     }
 
     @Override
     public String toString() {
         return "WeatherDataBean{" +
-                "reason='" + reason + '\'' +
-                ", result=" + result +
-                ", error_code=" + error_code +
+                "result=" + result +
                 '}';
     }
 }
