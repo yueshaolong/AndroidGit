@@ -72,6 +72,6 @@ public interface INetPhoto {
     @GET("onebox/weather/query?cityname=深圳")
     Observable<WeatherDataBean> getWeather1(@Query("key") String key);
 
-    @GET("onebox/weather/query?cityname=深圳&key=4ea58de8a7573377cec0046f5e2469d5")
+    @GET("onebox/weather/query?cityname=郑州&key=4ea58de8a7573377cec0046f5e2469d5")
     Observable<WeatherDataBean> getWeather2(@Header("app_version") String app_version);
 }
