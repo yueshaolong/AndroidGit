@@ -1,6 +1,5 @@
 package com.ysl.helloworld;
 
-import android.Manifest.permission;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -176,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         LogConfigurator logConfigurator = new LogConfigurator();
         logConfigurator.setFileName(getLogDirectory() + "log.txt");
-        logConfigurator.setRootLevel(Level.ALL);
+        logConfigurator.setRootLevel(Level.ERROR);
         logConfigurator.setFilePattern("%d %-5p [%t][%c{2}]-[%l] %m%n");
         logConfigurator.setUseLogCatAppender(true);
         logConfigurator.setMaxFileSize(1024 * 1024 * 10);
@@ -203,7 +202,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }else {
                 System.out.println("申请好权限了...");
                 configLogger();
-                logger.info("这是测试日志！！！");
+                logger.debug("这是测试日志！！！debug");
+                logger.info("这是测试日志！！！info");
+                logger.warn("这是测试日志！！！warn");
+                logger.error("这是测试日志！！！error");
             }
 //        } catch (Exception e) {
 //            e.printStackTrace();
