@@ -118,8 +118,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         verifyStoragePermissions(this);
 
-//        configLogger();
-//        logger.info("这是测试日志！！！");
+        configLogger();
+//        for (int i = 0; i < 10000; i++) {
+//            logger.info("这是测试日志！！！"+i);
+//        }
 
 //        requestPhoto();
 //        setImage();
@@ -146,13 +148,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public String getLogDirectory() {
-        System.out.println("--->"+Environment.getExternalStorageState());
-        System.out.println("--->"+Environment.getExternalStorageDirectory().getAbsolutePath());
-//        return Environment.getExternalStorageState()+ "/日志/";
-        return Environment.getExternalStorageDirectory().getAbsolutePath()+ "/日志/";
+        return Environment.getExternalStorageDirectory().getAbsolutePath()+ "/app日志/";
     }
     public void configLogger() {
-
         File dir = new File(getLogDirectory());
         if (!dir.exists()) {
             try {
@@ -162,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 System.out.println(""+e);
             }
         }
-        System.out.println("找到目录："+dir.getAbsolutePath());
         File file = new File(getLogDirectory() + "/log.txt");
         if (!file.exists()) {
             try {
@@ -175,10 +172,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         LogConfigurator logConfigurator = new LogConfigurator();
         logConfigurator.setFileName(getLogDirectory() + "log.txt");
-        logConfigurator.setRootLevel(Level.ERROR);
+        logConfigurator.setRootLevel(Level.ALL);
         logConfigurator.setFilePattern("%d %-5p [%t][%c{2}]-[%l] %m%n");
         logConfigurator.setUseLogCatAppender(true);
-        logConfigurator.setMaxFileSize(1024 * 1024 * 10);
+        logConfigurator.setMaxFileSize(1024 * 10);
         logConfigurator.setMaxBackupSize(1);
         logConfigurator.setImmediateFlush(true);
         logConfigurator.configure();
