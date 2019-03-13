@@ -39,6 +39,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -49,9 +50,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -128,6 +133,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        requestWeather();
 //        observableZip();
 //        request();
+    }
+
+    public void setOkHttpClient(){
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request.Builder requestBuilder = new Request.Builder().url("http://www.baidu.com");
+        //可以省略，默认是GET请求
+        requestBuilder.method("GET",null);
+        Request request = requestBuilder.build();
+        //同步请求
+        try {
+            okHttpClient.newCall(request).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //异步请求
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+            }
+        });
     }
 
     @Override
