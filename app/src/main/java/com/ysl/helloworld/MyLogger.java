@@ -1,5 +1,6 @@
 package com.ysl.helloworld;
 
+import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 
 import org.json.JSONException;
@@ -45,5 +46,10 @@ public class MyLogger {
             Logger.e(e, "create json error occured");
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        Logger.addLogAdapter(new AndroidLogAdapter());
+        new MyLogger().getLogger();
     }
 }

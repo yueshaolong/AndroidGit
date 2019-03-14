@@ -1,6 +1,9 @@
 package com.ysl.helloworld;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -47,6 +50,7 @@ import java.util.concurrent.TimeUnit;
 import de.mindpipe.android.logging.log4j.LogConfigurator;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
@@ -59,11 +63,17 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Retrofit;
-import retrofit2.Retrofit.Builder;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+@RuntimePermissions
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     public static Logger logger = Logger.getLogger(MainActivity.class);
@@ -72,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MainActivityPermissionsDispatcher.needWithPermissionCheck(this);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -84,16 +97,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .setAction("Action", null).show();
             }
         });
+
         //RxBinding用法
-        RxView.clicks(fab)
+        Disposable subscribe2 = RxView.clicks(fab)
                 .throttleFirst(5, TimeUnit.SECONDS)
                 .subscribe(new Consumer<Object>() {
-            @Override
-            public void accept(Object o) throws Exception {
-                Toast.makeText(MainActivity.this, "hello，RxBinding", Toast.LENGTH_SHORT).show();
-            }
-        });
-        RxView.longClicks(fab)
+                    @Override
+                    public void accept(Object o) throws Exception {
+                        Toast.makeText(MainActivity.this, "hello，RxBinding", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        Disposable subscribe1 = RxView.longClicks(fab)
                 .subscribe(new Consumer<Object>() {
                     @Override
                     public void accept(Object o) throws Exception {
@@ -101,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });
         //拖拽监听
-        RxView.drags(fab)
+        Disposable subscribe = RxView.drags(fab)
                 .subscribe(new Consumer<DragEvent>() {
                     @Override
                     public void accept(DragEvent dragEvent) throws Exception {
@@ -118,21 +132,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-//        Logger.addLogAdapter(new AndroidLogAdapter());
-//        new MyLogger().getLogger();
-
-        verifyStoragePermissions(this);
+//        verifyStoragePermissions(this);
 
         configLogger();
-//        for (int i = 0; i < 10000; i++) {
-//            logger.info("这是测试日志！！！"+i);
-//        }
+        for (int i = 0; i < 10000; i++) {
+            logger.info("这是测试日志！！！"+i);
+        }
 
-//        requestPhoto();
-//        setImage();
-//        requestWeather();
-//        observableZip();
-//        request();
+
+        requestPhoto();//Retrofit和RxJava简单使用
+//        setImage();//RxJava的简单使用
+//        requestWeather();//Retrofit和RxJava结合使用，到远端请求数据
+//        observableZip();//同时请求多个数据，可以打包使用
+//        request();//Retrofit简单使用
     }
 
     public void setOkHttpClient(){
@@ -161,22 +173,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_EXTERNAL_STORAGE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission Granted
-                    System.out.println("申请好权限了！");
-                    configLogger();
-                } else {
-                    System.out.println("权限被拒接！");
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
+
 
     public String getLogDirectory() {
         return Environment.getExternalStorageDirectory().getAbsolutePath()+ "/app日志/";
@@ -206,8 +203,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         logConfigurator.setRootLevel(Level.ALL);
         logConfigurator.setFilePattern("%d %-5p [%t][%c{2}]-[%l] %m%n");
         logConfigurator.setUseLogCatAppender(true);
-        logConfigurator.setMaxFileSize(1024 * 10);
-        logConfigurator.setMaxBackupSize(1);
+        logConfigurator.setMaxFileSize(1024 * 1);
+        logConfigurator.setMaxBackupSize(2);
         logConfigurator.setImmediateFlush(true);
         logConfigurator.configure();
     }
@@ -216,32 +213,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static String[] PERMISSIONS_STORAGE = {
             "android.permission.READ_EXTERNAL_STORAGE",
             "android.permission.WRITE_EXTERNAL_STORAGE" };
-
-
-    public void verifyStoragePermissions(Activity activity) {
-
-//        try {
-            //检测是否有写的权限
-            int permission = ActivityCompat.checkSelfPermission(activity,
-                    "android.permission.WRITE_EXTERNAL_STORAGE");
-            if (permission != PackageManager.PERMISSION_GRANTED) {
-                // 没有写的权限，去申请写的权限，会弹出对话框
-                ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE,REQUEST_EXTERNAL_STORAGE);
-            }else {
-                System.out.println("申请好权限了...");
-                configLogger();
-                logger.debug("这是测试日志！！！debug");
-                logger.info("这是测试日志！！！info");
-                logger.warn("这是测试日志！！！warn");
-                logger.error("这是测试日志！！！error");
-            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        switch (requestCode) {
+//            case REQUEST_EXTERNAL_STORAGE:
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    // Permission Granted
+//                    System.out.println("申请好权限了！");
+//                    configLogger();
+//                } else {
+//                    System.out.println("权限被拒接！");
+//                }
+//                break;
+//            default:
+//                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 //        }
+//    }
+    public void verifyStoragePermissions(Activity activity) {
+        //检测是否有写的权限
+        int permission = ActivityCompat.checkSelfPermission(activity,
+                "android.permission.WRITE_EXTERNAL_STORAGE");
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // 没有写的权限，去申请写的权限，会弹出对话框
+            ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE,REQUEST_EXTERNAL_STORAGE);
+        }else {
+            System.out.println("申请好权限了...");
+            configLogger();
+            logger.debug("这是测试日志！！！debug");
+            logger.info("这是测试日志！！！info");
+            logger.warn("这是测试日志！！！warn");
+            logger.error("这是测试日志！！！error");
+        }
     }
 
+    /**
+     * Retrofit和RxJava简单使用
+     */
     public void requestPhoto() {
-        new Retrofit.Builder()
+        Disposable subscribe = new Retrofit.Builder()
 //                .baseUrl("https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/")
                 .baseUrl("https://upload-images.jianshu.io/upload_images/")
 //                .addConverterFactory()
@@ -255,11 +264,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void accept(ResponseBody responseBody) throws Exception {
                         Bitmap bitmap = BitmapFactory.decodeStream(responseBody.byteStream());
-                        ((ImageView)findViewById(R.id.iv)).setBackground(new BitmapDrawable(bitmap));
+                        ((ImageView) findViewById(R.id.iv)).setBackground(new BitmapDrawable(bitmap));
                     }
                 });
     }
 
+    /**
+     * RxJava的简单使用
+     */
+    public void setImage(){
+        Disposable subscribe = Observable.just(getResources().getDrawable(R.mipmap.new_add_icon))
+                /*.map(new Function<Drawable, Bitmap>() {
+                    @Override
+                    public Bitmap apply(Drawable drawable) throws Exception {
+                        return ((BitmapDrawable)drawable).getBitmap();
+                    }
+                })*/
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Drawable>() {
+                    @Override
+                    public void accept(Drawable drawable) throws Exception {
+                        ((ImageView) findViewById(R.id.iv0)).setBackground(drawable);
+                    }
+                });
+    }
+
+    /**
+     * Retrofit和RxJava结合使用，到远端请求数据
+     */
     public void requestWeather() {
         Map<String, String> params = new HashMap<>();
         params.put("cityname", "武汉");
@@ -282,7 +315,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             logInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
         }
 
-        new Builder()
+        Disposable subscribe = new Retrofit.Builder()
                 .baseUrl("http://op.juhe.cn/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -305,35 +338,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .subscribe(new Consumer<WeatherDataBean>() {
                     @Override
                     public void accept(WeatherDataBean weatherDataBean) throws Exception {
-                        System.out.println("---->"+weatherDataBean);
-                        ((TextView)findViewById(R.id.tv)).setText(weatherDataBean.toString());
+                        System.out.println("---->" + weatherDataBean);
+                        ((TextView) findViewById(R.id.tv)).setText(weatherDataBean.toString());
                     }
                 });
     }
 
-    public void setImage(){
-        Observable.just(getResources().getDrawable(R.mipmap.new_add_icon))
-                /*.map(new Function<Drawable, Bitmap>() {
-                    @Override
-                    public Bitmap apply(Drawable drawable) throws Exception {
-                        return ((BitmapDrawable)drawable).getBitmap();
-                    }
-                })*/
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Drawable>() {
-                    @Override
-                    public void accept(Drawable drawable) throws Exception {
-                        ((ImageView)findViewById(R.id.iv0)).setBackground(drawable);
-                    }
-                });
-    }
-
-    public void request() {
-        new GankRequest().request();
-        new PostRequest().request();
-        new GetRequest().request();
-    }
+    /**
+     * 同时请求多个数据，可以打包使用
+     */
     public void observableZip() {
         HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
         if(BuildConfig.DEBUG){
@@ -342,7 +355,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else {
             logInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
         }
-        Observable.zip(
+        Disposable subscribe = Observable.zip(
                 /*new Builder()
                         .baseUrl("https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/")
                         .addConverterFactory(GsonConverterFactory.create())
@@ -350,14 +363,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .client(new OkHttpClient.Builder().addInterceptor(logInterceptor).build())
                         .build()
                         .create(INetPhoto.class).getCall(),//第一个Observable对象*/
-                new Builder()
+                new Retrofit.Builder()
                         .baseUrl("http://op.juhe.cn/")
                         .addConverterFactory(GsonConverterFactory.create())
                         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                         .client(new OkHttpClient.Builder().addInterceptor(new MyInterceptor()).build())
                         .build()
-                        .create(INetPhoto.class).getWeather("北京","4ea58de8a7573377cec0046f5e2469d5"),//第一个Observable对象
-                new Builder()
+                        .create(INetPhoto.class).getWeather("北京", "4ea58de8a7573377cec0046f5e2469d5"),//第一个Observable对象
+                new Retrofit.Builder()
                         .baseUrl("http://op.juhe.cn/")
                         .addConverterFactory(GsonConverterFactory.create())
                         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -367,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new BiFunction<WeatherDataBean, WeatherDataBean, String>() {
                     @Override
                     public String apply(WeatherDataBean weatherDataBean, WeatherDataBean weatherDataBean2) throws Exception {
-                        return weatherDataBean.toString()+"---"+weatherDataBean2.toString();
+                        return weatherDataBean.toString() + "---" + weatherDataBean2.toString();
                     }
                 })
                 .subscribeOn(Schedulers.newThread())
@@ -376,10 +389,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(String s) throws Exception {
-                        System.out.println("----->"+s);
+                        System.out.println("----->" + s);
+                        ((TextView) findViewById(R.id.tv)).setText(s);
                     }
                 });
     }
+
+    /**
+     * Retrofit简单使用
+     */
+    public void request() {
+        new GankRequest().request();
+        new PostRequest().request();//Retrofit Post请求
+        new GetRequest().request();//Retrofit Get请求
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -438,4 +462,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    void need() {
+        Toast.makeText(this, "need", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        MainActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    void show(final PermissionRequest request) {
+        new AlertDialog.Builder(this)
+                .setMessage("此APP需要以下权限，下一步将请求权限")
+                .setPositiveButton("下一步", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        request.proceed();//继续执行请求
+                    }
+                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                request.cancel();//取消执行请求
+            }
+        })
+                .show();
+    }
+
+    @OnPermissionDenied({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    void denide() {
+        Toast.makeText(this, "已拒绝一个或以上权限", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    void ask() {
+        Toast.makeText(this, "已拒绝一个或以上权限，并不再询问", Toast.LENGTH_SHORT).show();
+    }
 }
