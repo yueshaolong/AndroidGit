@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             logger.info("这是测试日志！！！"+i);
         }
 
+        setOkHttpClient();//OkHttp简单使用
 
         requestPhoto();//Retrofit和RxJava简单使用
 //        setImage();//RxJava的简单使用
@@ -148,11 +149,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void setOkHttpClient(){
-        OkHttpClient okHttpClient = new OkHttpClient();
+//        OkHttpClient okHttpClient = new OkHttpClient();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(10000, TimeUnit.MILLISECONDS)
+                .readTimeout(2000, TimeUnit.MILLISECONDS)
+                .writeTimeout(5000, TimeUnit.MILLISECONDS)
+                .build();
         Request.Builder requestBuilder = new Request.Builder().url("http://www.baidu.com");
         //可以省略，默认是GET请求
         requestBuilder.method("GET",null);
         Request request = requestBuilder.build();
+
         //同步请求
         try {
             okHttpClient.newCall(request).execute();
