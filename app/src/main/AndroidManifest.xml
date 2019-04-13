@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.ysl.helloworld">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -28,6 +29,8 @@
         <activity android:name="com.ysl.baohuo.BaoHuoActivity"
             android:launchMode="singleInstance"
             android:theme="@style/AppTheme.Translucent">
+        </activity>
+        <activity android:name="com.example.mylibrary.MyActivity">
         </activity>
     </application>
 

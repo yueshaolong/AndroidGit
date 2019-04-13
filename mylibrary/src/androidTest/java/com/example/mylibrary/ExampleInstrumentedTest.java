@@ -1,4 +1,4 @@
-package com.ysl.helloworld;
+package com.example.mylibrary;
 
 import android.content.Context;
 import androidx.test.InstrumentationRegistry;
@@ -17,10 +17,10 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.ysl.helloworld", appContext.getPackageName());
+        assertEquals("com.example.mylibrary.test", appContext.getPackageName());
     }
 }
