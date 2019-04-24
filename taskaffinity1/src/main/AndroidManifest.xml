@@ -29,4 +29,35 @@
         </activity>
     </application>
 
+
+    <!--对于应用开发人员而言，中的launchMode属性，是需要经常打交道的。它有四种模式：”standard”, “singleTop”, “singleTask”, “singleInstance”。
+
+    standard模式， 是默认的也是标准的Task模式，在没有其他因素的影响下，使用此模式的Activity，会构造一个Activity的实例，加入到调用者的Task栈中去，
+    对于使用频度一般开销一般什么都一般的Activity而言，standard模式无疑是最合适的，因为它逻辑简单条理清晰，所以是默认的选择。
+
+    而singleTop模式，基本上于standard一致，仅在请求的Activity正好位于栈顶时，有所区别。此时，配置成singleTop的Activity，
+    不再会构造新的实例加入到Task栈中，而是将新来的Intent发送到栈顶Activity中，栈顶的Activity可以通过重载onNewIntent来处理
+    新的Intent（当然，也可以无视…）。这个模式，降低了位于栈顶时的一些重复开销，更避免了一些奇异的行为（想象一下，如果在栈顶连续几个都是同样的Activity，
+    再一级级退出的时候，这是怎么样的用户体验…），很适合一些会有更新的列表Activity展示。一个活生生的实例是，
+    在Android默认提供的应用中，浏览器（Browser）的书签Activity（BrowserBookmarkPage），就用的是singleTop。
+
+    singleTop模式，虽然破坏了原有栈的逻辑（复用了栈顶，而没有构造新元素进栈…），但并未开辟专属的Task。而singleTask，和singleInstance，
+    则都采取的另辟Task的蹊径。标志为singleTask的Activity，最多仅有一个实例存在，并且，位于以它为根的Task中。
+    所有对该Activity的请求，都会跳到该Activity的Task中展开进行。singleTask，很象概念中的单件模式，
+    所有的修改都是基于一个实例，这通常用在构造成本很大，但切换成本较小的Activity中。在Android源码提供的应用中，
+    该模式被广泛的采用，最典型的例子，还是浏览器应用的主Activity（名为Browser…），它是展示当前tab，当前页面内容的窗口。
+    它的构造成本大，但页面的切换还是较快的，于singleTask相配，还是挺天作之合的。
+
+    相比之下，singleInstance显得更为极端一些。在大部分时候singleInstance与singleTask完全一致，唯一的不同在于，singleInstance的Activity，
+    是它所在栈中仅有的一个Activity，如果涉及到的其他Activity，都移交到其他Task中进行。这使得singleInstance的Activity，
+    像一座孤岛，彻底的黑盒，它不关注请求来自何方，也不计较后续由谁执行。在Android默认的各个应用中，很少有这样的Activity，
+    在我个人的工程实践中，曾尝试在有道词典的快速取词Activity中采用过，是因为我觉得快速取词入口足够方便（从notification中点选进入），
+    并且会在各个场合使用，应该做得完全独立。
+
+    除了launchMode可以用来调配Task，的另一属性taskAffinity，也是常常被使用。taskAffinity，是一种物以类聚的思想，
+    它倾向于将taskAffinity属性相同的Activity，扔进同一个Task中。不过，它的约束力，较之launchMode而言，弱了许多。
+    只有当中的allowTaskReparen ting设置为true，抑或是调用方将Intent的flag添加FLAG_ACTIVITY_NEW_TASK属性时才会生效。
+    如果有机会用到Android的Notification机制就能够知道，每一个由notification进行触发的Activity，都必须是一个设成FLAG_ACTIVITY_NEW_TASK的Intent来调用。
+    这时候，开发者很可能需要妥善配置taskAffinity属性，使得调用起来的Activity，能够找到组织，在同一taskAffinity的Task中进行运行。-->
+
 </manifest>
