@@ -23,6 +23,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        System.out.println("invoke onPostResume,执行在onResume之后");
+    }
+
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+    }
+
+    @Override
     protected void onRestart() {
         super.onRestart();
         System.out.println("invoke onRestart");
