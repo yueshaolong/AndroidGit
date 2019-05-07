@@ -3,11 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.ysl.helloworld">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission
+        android:name="android.permission.AUTHENTICATE_ACCOUNTS"
+        android:maxSdkVersion="22" />
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS"
+        android:maxSdkVersion="22" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
 
     <application
@@ -17,32 +26,61 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <service
+            android:name="com.ysl.baohuo.foregroundservice.MyService"
+            android:enabled="true"
+            android:exported="true"></service>
+        <service android:name="com.ysl.baohuo.foregroundservice.MyService$InnerService"/>
+        <service android:name="com.ysl.baohuo.systemservice.OrdinaryService"/>
+
+        <service android:name="com.ysl.baohuo.accountservice.AccountService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/account_authenticator"/>
+        </service>
+        <service android:name="com.ysl.baohuo.accountservice.SyncService">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+            <meta-data android:name="android.content.SyncAdapter"
+                android:resource="@xml/sync_adapter"/>
+        </service>
+        <provider
+            android:authorities="com.ysl.baohuo.accountservice.provider"
+            android:name="com.ysl.baohuo.accountservice.SyncProvider"/>
+
+        <service android:name="com.ysl.baohuo.jobscheduler.MyJobSchedulerService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+
+        <service
+            android:name="com.ysl.baohuo.notificationlistenerservice.MyNotificationListenerService"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:launchMode="standard"
-            android:theme="@style/AppTheme.NoActionBar">
-            <!--android:taskAffinity="目标app的任务栈名称"-->
-            <!--android:allowTaskReparenting="true"-->
-            <!--只有当中的allowTaskReparen ting设置为true，抑或是调用方将Intent的flag添加FLAG_ACTIVITY_NEW_TASK属性时才会生效。-->
-            <!--每个Activity都有taskAffinity属性，这个属性指出了它希望进入的Task。如果一个Activity没有显式的指明该 Activity的taskAffinity，
-            那么它的这个属性就等于Application指明的taskAffinity，如果 Application也没有指明，那么该taskAffinity的值就等于包名。
-            而Task也有自己的affinity属性，它的值等于它的根 Activity的taskAffinity的值。-->
-
-        </activity>
-        <activity android:name="com.ysl.baohuo.BaoHuoActivity"
-            android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.Translucent">
-        </activity>
-        <activity android:name="com.example.mylibrary.MyActivity">
-        </activity>
-        <activity android:name="com.ysl.recyclerview.RecyclerViewActivity" >
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name="com.ysl.baohuo.MyActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.ysl.baohuo.onepix.OnePixActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/AppTheme.Translucent"></activity>
+        <activity android:name="com.example.mylibrary.MyActivity"></activity>
+        <activity android:name="com.ysl.recyclerview.RecyclerViewActivity"></activity>
     </application>
 
 </manifest>

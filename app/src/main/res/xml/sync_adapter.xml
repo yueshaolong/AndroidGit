@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sync_adapter xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accountType="com.ysl.baohuo.accountservice.account"
+    android:allowParallelSyncs="false"
+    android:contentAuthority="com.ysl.baohuo.accountservice.provider"
+    android:isAlwaysSyncable="true"
+    android:userVisible="false"
+    />
