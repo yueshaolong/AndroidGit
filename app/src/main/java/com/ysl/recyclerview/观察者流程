@@ -1,0 +1,53 @@
+//被观察者注册观察者，就是内部维护一个观察者的列表
+recyclerView.setAdapter();
+setAdapterInternal(adapter, false, true);
+private final RecyclerViewDataObserver mObserver = new RecyclerViewDataObserver();
+adapter.registerAdapterDataObserver(mObserver);
+mObservable.registerObserver(observer);
+private final AdapterDataObservable mObservable = new AdapterDataObservable();
+public void registerObserver(T observer) {
+        if (observer == null) {
+            throw new IllegalArgumentException("The observer is null.");
+        }
+        synchronized(mObservers) {
+            if (mObservers.contains(observer)) {
+                throw new IllegalStateException("Observer " + observer + " is already registered.");
+            }
+            mObservers.add(observer);
+        }
+    }
+
+//被观察者通知数据变化，就是通知列表中的所有观察者数据变了，刷新UI
+recyclerViewAdapter.notifyDataSetChanged();
+mObservable.notifyChanged();
+mObservers.get(i).onChanged();
+AdapterDataObserver.onChanged();
+RecyclerViewDataObserver.onChanged();
+public void onChanged() {
+    assertNotInLayoutOrScroll(null);
+    mState.mStructureChanged = true;
+
+    processDataSetCompletelyChanged(true);
+    if (!mAdapterHelper.hasPendingUpdates()) {
+        requestLayout();
+    }
+}
+
+
+
+public final VH createViewHolder(@NonNull ViewGroup parent, int viewType) {
+    try {
+        TraceCompat.beginSection(TRACE_CREATE_VIEW_TAG);
+        final VH holder = onCreateViewHolder(parent, viewType);
+        if (holder.itemView.getParent() != null) {
+            throw new IllegalStateException("ViewHolder views must not be attached when"
+                    + " created. Ensure that you are not passing 'true' to the attachToRoot"
+                    + " parameter of LayoutInflater.inflate(..., boolean attachToRoot)");
+        }
+        holder.mItemViewType = viewType;
+        return holder;
+    } finally {
+        TraceCompat.endSection();
+    }
+}
+final int type = mAdapter.getItemViewType(offsetPosition);
