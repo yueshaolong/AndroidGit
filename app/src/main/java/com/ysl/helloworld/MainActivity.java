@@ -24,6 +24,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -49,6 +51,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -143,16 +146,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 //        verifyStoragePermissions(this);
 
-        configLogger();
-        for (int i = 0; i < 10000; i++) {
-            logger.info("这是测试日志！！！"+i);
-        }
+//        configLogger();
+//        for (int i = 0; i < 10000; i++) {
+//            logger.info("这是测试日志！！！"+i);
+//        }
 
 //        setOkHttpClient();//OkHttp简单使用
 
-        requestPhoto();//Retrofit和RxJava简单使用
+//        requestPhoto();//Retrofit和RxJava简单使用
 //        setImage();//RxJava的简单使用
-//        requestWeather();//Retrofit和RxJava结合使用，到远端请求数据
+        requestWeather();//Retrofit和RxJava结合使用，到远端请求数据
 //        observableZip();//同时请求多个数据，可以打包使用
 //        request();//Retrofit简单使用
 
@@ -336,7 +339,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         RequestBody requestBody0 = RequestBody.create(MediaType.parse("UTF-8"), "北京");
         RequestBody requestBody1 = RequestBody.create(MediaType.parse("UTF-8"), "4ea58de8a7573377cec0046f5e2469d5");
 
-        HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
+        HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+            @Override
+            public void log(String message) {
+                try {
+                    String text = URLDecoder.decode(message, "utf-8");
+                    Log.i("OKHttp---->", message);
+//                    System.out.println("OKHttp---->"+ text);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e("OKHttp:", message);
+                }
+            }
+        });
         if(BuildConfig.DEBUG){
             //显示日志
             logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
