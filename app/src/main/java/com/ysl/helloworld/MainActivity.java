@@ -333,8 +333,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ParamsBean paramsBean = new ParamsBean();
         paramsBean.setCityname("武汉");
         paramsBean.setKey("4ea58de8a7573377cec0046f5e2469d5");
-        System.out.println(new Gson().toJson(paramsBean));
-        System.out.println(RequestBody.create(MediaType.parse("application/json; charset=utf-8"),new Gson().toJson(paramsBean)).toString());
+//        System.out.println(new Gson().toJson(paramsBean));
+//        System.out.println(RequestBody.create(MediaType.parse("application/json; charset=utf-8"),new Gson().toJson(paramsBean)).toString());
 
         RequestBody requestBody0 = RequestBody.create(MediaType.parse("UTF-8"), "北京");
         RequestBody requestBody1 = RequestBody.create(MediaType.parse("UTF-8"), "4ea58de8a7573377cec0046f5e2469d5");
@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void log(String message) {
                 try {
                     String text = URLDecoder.decode(message, "utf-8");
-                    Log.i("OKHttp---->", message);
+                    Log.i("OKHTTP---->", message);
 //                    System.out.println("OKHttp---->"+ text);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -352,6 +352,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
+//        HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
         if(BuildConfig.DEBUG){
             //显示日志
             logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -360,12 +361,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         Disposable subscribe = new Retrofit.Builder()
-                .baseUrl("http://op.juhe.cn/")
+                .baseUrl("https://op.juhe.cn/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-//                .client(new OkHttpClient.Builder().addInterceptor(logInterceptor).build())
+                .client(new OkHttpClient.Builder().addInterceptor(logInterceptor).build())
 //                .client(new OkHttpClient.Builder().addInterceptor(new MyInterceptor()).build())
-                .client(new OkHttpClient.Builder().addNetworkInterceptor(logInterceptor).build())
+//                .client(new OkHttpClient.Builder().addNetworkInterceptor(logInterceptor).build())
                 .build()
                 .create(INetPhoto.class)
                 .getWeather("武汉", "4ea58de8a7573377cec0046f5e2469d5")
