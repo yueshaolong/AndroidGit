@@ -144,18 +144,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-//        verifyStoragePermissions(this);
-
-//        configLogger();
-//        for (int i = 0; i < 10000; i++) {
+        //日志测试
+        configLogger();
+        long start = System.currentTimeMillis();
+        System.out.println("开始："+start);
+        for (int i = 0; i < 10000; i++) {
+            Log.v("MainActivity","这是测试日志！！！"+i);
+            Log.d("MainActivity","这是测试日志！！！"+i);
+            Log.i("MainActivity","这是测试日志！！！"+i);
+            Log.w("MainActivity","这是测试日志！！！"+i);
+            Log.e("MainActivity","这是测试日志！！！"+i);
+//            logger.debug("这是测试日志！！！"+i);
 //            logger.info("这是测试日志！！！"+i);
-//        }
+//            logger.warn("这是测试日志！！！"+i);
+//            logger.error("这是测试日志！！！"+i);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("结束："+end);
+        System.out.println("耗时" + (end - start));
 
 //        setOkHttpClient();//OkHttp简单使用
 
 //        requestPhoto();//Retrofit和RxJava简单使用
 //        setImage();//RxJava的简单使用
-        requestWeather();//Retrofit和RxJava结合使用，到远端请求数据
+//        requestWeather();//Retrofit和RxJava结合使用，到远端请求数据
 //        observableZip();//同时请求多个数据，可以打包使用
 //        request();//Retrofit简单使用
 
@@ -239,43 +251,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         logConfigurator.setMaxBackupSize(2);
         logConfigurator.setImmediateFlush(true);
         logConfigurator.configure();
-    }
-
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            "android.permission.READ_EXTERNAL_STORAGE",
-            "android.permission.WRITE_EXTERNAL_STORAGE" };
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        switch (requestCode) {
-//            case REQUEST_EXTERNAL_STORAGE:
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    // Permission Granted
-//                    System.out.println("申请好权限了！");
-//                    configLogger();
-//                } else {
-//                    System.out.println("权限被拒接！");
-//                }
-//                break;
-//            default:
-//                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        }
-//    }
-    public void verifyStoragePermissions(Activity activity) {
-        //检测是否有写的权限
-        int permission = ActivityCompat.checkSelfPermission(activity,
-                "android.permission.WRITE_EXTERNAL_STORAGE");
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // 没有写的权限，去申请写的权限，会弹出对话框
-            ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE,REQUEST_EXTERNAL_STORAGE);
-        }else {
-            System.out.println("申请好权限了...");
-            configLogger();
-            logger.debug("这是测试日志！！！debug");
-            logger.info("这是测试日志！！！info");
-            logger.warn("这是测试日志！！！warn");
-            logger.error("这是测试日志！！！error");
-        }
     }
 
     /**
