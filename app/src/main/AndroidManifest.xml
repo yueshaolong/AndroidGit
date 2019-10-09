@@ -69,11 +69,7 @@
             android:launchMode="standard"
             android:theme="@style/AppTheme.NoActionBar">
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name="com.ysl.baohuo.MyActivity">
         </activity>
@@ -82,7 +78,13 @@
             android:launchMode="singleInstance"
             android:theme="@style/AppTheme.Translucent"></activity>
         <activity android:name="com.example.mylibrary.MyActivity"></activity>
-        <activity android:name="com.ysl.recyclerview.RecyclerViewActivity"></activity>
+        <activity android:name="com.ysl.recyclerview.RecyclerViewActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

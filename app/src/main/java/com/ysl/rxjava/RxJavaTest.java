@@ -33,10 +33,48 @@ import io.reactivex.subjects.Subject;
 public class RxJavaTest {
 
     public static void main(String[] args) {
-        useRxJava();
+//        useRxJava();
 
-        createObserver();
-        operator();
+//        createObserver();
+//        operator();
+
+        List<String> stringList = new ArrayList<>();
+        stringList.add("ad");
+        stringList.add("sdfsdf");
+        stringList.add("sd23sdf");
+        stringList.add("213");
+//        List<String> stringList2 = new ArrayList<>();
+//        for (String ss: stringList) {
+//            Observable.just(ss)
+//                    .filter(new Predicate<String>() {
+//                        @Override
+//                        public boolean test(String s) throws Exception {
+//                            return s.contains("d");
+//                        }
+//                    }).subscribe(new Consumer<String>() {
+//                @Override
+//                public void accept(String s) throws Exception {
+//                    System.out.println("onNext : filter : " + s);
+//                    stringList2.add(s);
+//                }
+//            });
+//        }
+//        System.out.println(stringList2);
+
+
+        Observable.just(stringList)
+                .filter(new Predicate<List<String>>() {
+                    @Override
+                    public boolean test(List<String> strings) throws Exception {
+                        return strings.contains("ad8");
+                    }
+                }).subscribe(new Consumer<List<String>>() {
+            @Override
+            public void accept(List<String> strings) throws Exception {
+                System.out.println(strings);
+            }
+        });
+
     }
 
     public static void useRxJava(){
