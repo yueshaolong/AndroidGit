@@ -1,2 +1,2 @@
-include ':app', ':taskaffinity1', ':taskaffinity2'
+include ':app', ':taskaffinity1', ':taskaffinity2', ':chajian'
 include ':mylibrary'

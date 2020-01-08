@@ -25,7 +25,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <service
             android:name="com.ysl.baohuo.foregroundservice.MyService"
             android:enabled="true"
@@ -79,6 +80,9 @@
             android:theme="@style/AppTheme.Translucent"></activity>
         <activity android:name="com.example.mylibrary.MyActivity"></activity>
         <activity android:name="com.ysl.recyclerview.RecyclerViewActivity">
+
+        </activity>
+        <activity android:name="com.ysl.chajian.ChaJianActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
