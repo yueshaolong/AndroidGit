@@ -3,16 +3,9 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/button2"
+    <TextView
+        android:id="@+id/textView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="调用插件app类" />
-
-    <Button
-        android:id="@+id/buttonact"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="启动插件activity" />
-
+        android:text="代理activity" />
 </LinearLayout>

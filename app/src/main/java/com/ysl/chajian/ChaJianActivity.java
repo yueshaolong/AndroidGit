@@ -1,6 +1,8 @@
 package com.ysl.chajian;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -8,71 +10,40 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.ysl.helloworld.R;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
-import dalvik.system.PathClassLoader;
 
 public class ChaJianActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_chajian);
+        //把插件apk加载进去
+        LoadUtil.loadChaJian(ChaJianActivity.this);
 
+        HookUtil.hookStartAct();
+        HookUtil.hookHander();
+
+        //调用插件类
         findViewById(R.id.button2).setOnClickListener(v -> {
             printClassLoader();
-            loadChaJian();
-
             try {
-                Class<?> aClass = Class.forName("com.ysl.chajian.Test");
+                Class<?> aClass = Class.forName("com.ysl.chajianc.Test");
                 Method print = aClass.getMethod("print");
                 print.invoke(null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
+        //启动插件activity
+        findViewById(R.id.buttonact).setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName("com.ysl.chajianc",
+                    "com.ysl.chajianc.MainActivity"));
+            startActivity(intent);
+        });
     }
 
-    private void loadChaJian() {
-        try {
-            //反射获取BaseDexClassLoader，并拿到DexPathList属性
-            Class<?> aClass = Class.forName("dalvik.system.BaseDexClassLoader");
-            Field pathListField = aClass.getDeclaredField("pathList");
-            pathListField.setAccessible(true);
 
-            //反射获取到DexPathList对象, 拿到dexElements属性
-            Class<?> dexPathList = Class.forName("dalvik.system.DexPathList");
-            Field dexElementsField = dexPathList.getDeclaredField("dexElements");
-            dexElementsField.setAccessible(true);
-
-            //先获取插件的classloader
-            PathClassLoader pathClassLoader = new PathClassLoader(
-                    "/sdcard/chajian-debug.apk", getClassLoader());
-            //通过classloader获取到真实的DexPathList对象
-            Object pluginPathList = pathListField.get(pathClassLoader);
-            //拿到Elements数组
-            Object[] pliginElements = (Object[]) dexElementsField.get(pluginPathList);
-
-            //获取宿主的classloader
-            PathClassLoader mainPathClassLoader = (PathClassLoader) getClassLoader();
-            Object hostPathList = pathListField.get(mainPathClassLoader);
-            Object[] hostElements = (Object[]) dexElementsField.get(hostPathList);
-
-            //创建新数组
-            Object[] newElements = (Object[]) Array.newInstance(pliginElements.getClass().getComponentType(),
-                    pliginElements.length + hostElements.length);
-            System.arraycopy(hostElements, 0, newElements, 0, hostElements.length);
-            System.arraycopy(pliginElements, 0, newElements, hostElements.length, pliginElements.length);
-
-            // 将创建的 dexElements 放到宿主的 dexElements中
-            // 宿主的dexElements = 新的dexElements
-            dexElementsField.set(hostPathList, newElements);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
     private void printClassLoader() {
         ClassLoader classLoader = getClassLoader();
