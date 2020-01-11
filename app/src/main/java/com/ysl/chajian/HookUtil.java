@@ -11,6 +11,8 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
+import com.ysl.helloworld.MainActivity;
+
 import androidx.annotation.RequiresApi;
 
 import java.lang.reflect.Field;
@@ -110,7 +112,7 @@ public class HookUtil {
                 @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                 @Override
                 public boolean handleMessage(Message msg) {
-                    Log.e("---->", "handleMessage: "+msg.toString());
+//                    Log.e("---->", "handleMessage: "+msg.toString());
                     switch (msg.what) {
                         case 100:
                             try {
@@ -118,16 +120,21 @@ public class HookUtil {
                                 Field intentField = activityClientRecordClass.getDeclaredField("intent");
                                 intentField.setAccessible(true);
                                 Intent proxyIntent = (Intent) intentField.get(msg.obj);
+                                Log.e("---->", "proxyIntent："+proxyIntent.toString());
 
                                 Intent intent = proxyIntent.getParcelableExtra(CHAJIANACT);
-                                Log.e("---->", "handleMessage: 拿到插件intent："+intent.toString());
-                                proxyIntent.setComponent(intent.getComponent());
-//                                intentField.set(msg.obj, intent);//是否可以替换为这句
+                                Log.e("---->", "intent："+intent.toString());
+//                                proxyIntent.setComponent(intent.getComponent());
+                                intentField.set(msg.obj, intent);//是否可以替换为这句
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            break;
-                        case 146:
+                            /*E/---->: proxyIntent：Intent { cmp=com.ysl.helloworld/com.ysl.chajian.ProxyActivity (has extras) }
+                            E/---->: intent：Intent { cmp=com.ysl.chajianc/.MainActivity
+                            E/chajianc----->: onCreate: 我是插件activity*/
+
+                        break;
+                        /*case 146:
                             Pair<IBinder, ActivityOptions> pair = (Pair<IBinder, ActivityOptions>) msg.obj;
 //                            onNewActivityOptions(pair.first, pair.second);
                             try {
@@ -167,7 +174,7 @@ public class HookUtil {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            break;
+                            break;*/
                         default:
                             break;
                     }
