@@ -134,7 +134,7 @@ public class HookUtil {
                             E/chajianc----->: onCreate: 我是插件activity*/
 
                         break;
-                        /*case 146:
+                        case 146:
                             Pair<IBinder, ActivityOptions> pair = (Pair<IBinder, ActivityOptions>) msg.obj;
 //                            onNewActivityOptions(pair.first, pair.second);
                             try {
@@ -174,7 +174,7 @@ public class HookUtil {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            break;*/
+                            break;
                         default:
                             break;
                     }
