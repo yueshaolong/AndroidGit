@@ -22,11 +22,12 @@ public class HookUtil {
         try {
             //反射获取IActivityManager的class对象
             Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
-            Class<?> iActivityTaskManagerClass = Class.forName("android.app.IActivityTaskManager");
             Object singleton;
+            Class<?> iActivityTaskManagerClass = null;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 //反射获取ActivityManager，获取IActivityManagerSingleton属性
+                iActivityTaskManagerClass = Class.forName("android.app.IActivityTaskManager");
                 Class<?> activityTaskManagerClass = Class.forName("android.app.ActivityTaskManager");
                 Field iActivityTaskManagerSingletonField = activityTaskManagerClass.getDeclaredField("IActivityTaskManagerSingleton");
                 iActivityTaskManagerSingletonField.setAccessible(true);
