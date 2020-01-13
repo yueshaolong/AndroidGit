@@ -17,11 +17,7 @@ public class ChaJianActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_chajian);
-        //把插件apk加载进去
-        LoadUtil.loadChaJian(ChaJianActivity.this);
 
-        HookUtil.hookStartAct();
-        HookUtil.hookHander();
 
         //调用插件类
         findViewById(R.id.button2).setOnClickListener(v -> {

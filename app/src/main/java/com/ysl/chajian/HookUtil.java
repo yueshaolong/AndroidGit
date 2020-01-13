@@ -1,17 +1,11 @@
 package com.ysl.chajian;
 
-import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
-import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Pair;
-
-import com.ysl.helloworld.MainActivity;
 
 import androidx.annotation.RequiresApi;
 
@@ -19,6 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.List;
 
 public class HookUtil {
 
@@ -27,12 +22,28 @@ public class HookUtil {
         try {
             //反射获取IActivityManager的class对象
             Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
+            Class<?> iActivityTaskManagerClass = Class.forName("android.app.IActivityTaskManager");
+            Object singleton;
 
-            //反射获取ActivityManager，获取IActivityManagerSingleton属性
-            Class<?> activityManagerClass = Class.forName("android.app.ActivityManager");
-            Field iActivityManagerSingletonField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
-            iActivityManagerSingletonField.setAccessible(true);
-            Object singleton = iActivityManagerSingletonField.get(null);//因为此属性是静态的，所以传null
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                //反射获取ActivityManager，获取IActivityManagerSingleton属性
+                Class<?> activityTaskManagerClass = Class.forName("android.app.ActivityTaskManager");
+                Field iActivityTaskManagerSingletonField = activityTaskManagerClass.getDeclaredField("IActivityTaskManagerSingleton");
+                iActivityTaskManagerSingletonField.setAccessible(true);
+                singleton = iActivityTaskManagerSingletonField.get(null);//因为此属性是静态的，所以传null
+            }else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                //反射获取ActivityManager，获取IActivityManagerSingleton属性
+                Class<?> activityManagerClass = Class.forName("android.app.ActivityManager");
+                Field iActivityManagerSingletonField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
+                iActivityManagerSingletonField.setAccessible(true);
+                singleton = iActivityManagerSingletonField.get(null);//因为此属性是静态的，所以传null
+            } else {
+                //反射获取ActivityManager，获取gDefault属性
+                Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
+                Field gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
+                gDefaultField.setAccessible(true);
+                singleton = gDefaultField.get(null);//因为此属性是静态的，所以传null
+            }
 
             //反射Singleton，获取mInstance属性
             Class<?> singletonClass = Class.forName("android.util.Singleton");
@@ -43,7 +54,8 @@ public class HookUtil {
             //找到hook点：Instrumentation$execStartActivity$1668行
             //使用动态代理方式，重写startActivity方法
             Object proxyInstance = Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),//类加载器ClassLoader
-                    new Class[]{iActivityManagerClass},//被代理的接口类，这里是IActivityManager
+                    new Class[]{Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+                            iActivityTaskManagerClass : iActivityManagerClass},//被代理的接口类，这里是IActivityManager
                     new InvocationHandler() {
                         /**
                          *动态代理的实现
@@ -123,9 +135,10 @@ public class HookUtil {
                                 Log.e("---->", "proxyIntent："+proxyIntent.toString());
 
                                 Intent intent = proxyIntent.getParcelableExtra(CHAJIANACT);
-                                Log.e("---->", "intent："+intent.toString());
-//                                proxyIntent.setComponent(intent.getComponent());
-                                intentField.set(msg.obj, intent);//是否可以替换为这句
+                                if (intent != null) {
+                                    Log.e("---->", "intent："+intent.toString());
+                                    intentField.set(msg.obj, intent);//是否可以替换为这句
+                                }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -134,43 +147,27 @@ public class HookUtil {
                             E/chajianc----->: onCreate: 我是插件activity*/
 
                         break;
-                        case 146:
-                            Pair<IBinder, ActivityOptions> pair = (Pair<IBinder, ActivityOptions>) msg.obj;
-//                            onNewActivityOptions(pair.first, pair.second);
-                            try {
-                                Class<?> activityClientRecordClass = pair.second.getClass();
-                                Field intentField = activityClientRecordClass.getDeclaredField("intent");
-                                intentField.setAccessible(true);
-                                Intent proxyIntent = (Intent) intentField.get(msg.obj);
-
-                                Intent intent = proxyIntent.getParcelableExtra(CHAJIANACT);
-                                Log.e("---->", "handleMessage: 拿到插件intent："+intent.toString());
-                                proxyIntent.setComponent(intent.getComponent());
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
                         case 159:
                             try {
                                 Class<?> transactionClass = Class.forName("android.app.servertransaction.ClientTransaction");
-                                Field mActivityTokenField = transactionClass.getDeclaredField("mActivityToken");
-                                mActivityTokenField.setAccessible(true);
-                                IBinder mActivityToken = (IBinder) mActivityTokenField.get(msg.obj);
+                                Field mActivityCallbacksField = transactionClass.getDeclaredField("mActivityCallbacks");
+                                mActivityCallbacksField.setAccessible(true);
+                                List mActivityCallbacks = (List) mActivityCallbacksField.get(msg.obj);
 
-                                Field mActivitiesField = activityThreadClass.getDeclaredField("mActivities");
-                                mActivitiesField.setAccessible(true);
-                                ArrayMap<IBinder, Object> arrayMap = (ArrayMap<IBinder, Object>) mActivitiesField.get(activityThread);
-                                Object o = arrayMap.get(mActivityToken);
+                                for (Object mActivityCallback : mActivityCallbacks) {
+                                    if(mActivityCallback.getClass().getName().equals(
+                                            "android.app.servertransaction.LaunchActivityItem")){
+                                        Field mIntentField = mActivityCallback.getClass().getDeclaredField("mIntent");
+                                        mIntentField.setAccessible(true);
+                                        Intent proxyIntent = (Intent) mIntentField.get(mActivityCallback);
 
-                                Class<?> activityClientRecordClass = o.getClass();
-                                Field intentField = activityClientRecordClass.getDeclaredField("intent");
-                                intentField.setAccessible(true);
-                                Intent proxyIntent = (Intent) intentField.get(msg.obj);
-
-                                Intent intent = proxyIntent.getParcelableExtra(CHAJIANACT);
-                                Log.e("---->", "handleMessage: 拿到插件intent："+intent.toString());
-                                proxyIntent.setComponent(intent.getComponent());
-
+                                        Intent intent = proxyIntent.getParcelableExtra(CHAJIANACT);
+                                        if (intent != null) {
+                                            Log.e("---->", "handleMessage: 拿到插件intent："+intent.toString());
+                                            mIntentField.set(mActivityCallback, intent);
+                                        }
+                                    }
+                                }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
