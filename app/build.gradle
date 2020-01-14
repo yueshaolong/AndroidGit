@@ -52,6 +52,7 @@ dependencies {
     implementation 'com.orhanobut:logger:2.2.0'
     implementation 'de.mindpipe.android:android-logging-log4j:1.0.3'
     implementation 'log4j:log4j:1.2.17'
+    implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
     implementation 'com.github.hotchemi:permissionsdispatcher:3.1.0'
     annotationProcessor 'com.github.hotchemi:permissionsdispatcher-processor:3.1.0'
 
