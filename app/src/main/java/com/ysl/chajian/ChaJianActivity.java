@@ -14,13 +14,15 @@ import com.ysl.helloworld.R;
 
 import java.lang.reflect.Method;
 
+import io.reactivex.disposables.Disposable;
+
 public class ChaJianActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_chajian);
 
-        new RxPermissions(this).request(Manifest.permission.READ_EXTERNAL_STORAGE)
+        Disposable subscribe = new RxPermissions(this).request(Manifest.permission.READ_EXTERNAL_STORAGE)
                 .subscribe(aBoolean -> {
 
                 });
