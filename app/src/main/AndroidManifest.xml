@@ -84,6 +84,9 @@
 
         </activity>
         <activity android:name="com.ysl.chajian.ChaJianActivity">
+
+        </activity>
+        <activity android:name="com.ysl.ditu.Go2MapActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

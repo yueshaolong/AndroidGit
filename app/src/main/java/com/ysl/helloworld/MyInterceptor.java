@@ -17,7 +17,8 @@ import okhttp3.internal.http.HttpHeaders;
 import okio.Buffer;
 import okio.BufferedSource;
 
-import static okhttp3.internal.Util.UTF_8;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 
 /**
  * Created by Administrator on 2018/9/27.

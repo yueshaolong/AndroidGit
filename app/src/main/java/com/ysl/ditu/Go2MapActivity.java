@@ -1,0 +1,183 @@
+package com.ysl.ditu;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.ysl.helloworld.R;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Go2MapActivity extends AppCompatActivity {
+    private static final String TAG = "dt";
+    //1.百度地图包名
+    public static final String BAIDUMAP_PACKAGENAME = "com.baidu.BaiduMap";
+    //2.高德地图包名
+    public static final String AUTONAVI_PACKAGENAME = "com.autonavi.minimap";
+    //3.腾讯地图包名
+    public static final String QQMAP_PACKAGENAME = "com.tencent.map";
+    /**
+     * 参数的key
+     * 高德的坐标系 "gd_lng" (高德_经度)、"gd_lat"（纬度）、"destination"（目的地名称）
+     */
+    private static final String GCJO2_LNG = "gd_lng";
+    private static final String GCJO2_LAT = "gd_lat";
+    private static final String DESTINATION = "destination";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        findViewById(R.id.tv).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                go2Map();
+            }
+        });
+    }
+
+    private void go2Map() {
+        List<String> packages = checkInstalledPackage(this,MAP_PACKAGES);
+        if (packages.size() == 0) {
+            Toast.makeText(this, "请安装地图应用", Toast.LENGTH_LONG).show();
+        } else {
+            Map<String, String> arg = new HashMap();
+            arg.put(DESTINATION,"天安门");
+            for (String packageName : packages) {
+                switch (packageName) {
+                    case BAIDUMAP_PACKAGENAME:
+                        arg.put(GCJO2_LNG,"116.39752865");
+                        arg.put(GCJO2_LAT,"39.90873221");
+                        invokeBaiDuMap(this, arg);
+                        return;
+                    case AUTONAVI_PACKAGENAME:
+                        arg.put(GCJO2_LNG,"116.39752865");
+                        arg.put(GCJO2_LAT,"39.90873221");
+                        invokeAuToNaveMap(this, arg);
+                        return;
+                    case QQMAP_PACKAGENAME:
+                        arg.put(GCJO2_LNG,"116.39752865");
+                        arg.put(GCJO2_LAT,"39.90873221");
+                        invokeQQMap(this, arg);
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * 调用百度地图----------------
+     *
+     * @param context 上下文对象
+     * @param arg     参数
+     */
+    private static void invokeBaiDuMap(Context context, Map arg) {
+
+        try {
+            Uri uri = Uri.parse("baidumap://map/geocoder?" +
+                    "location=" + arg.get(GCJO2_LAT) + "," + arg.get(GCJO2_LNG) +
+                    "&name=" + arg.get(DESTINATION) + //终点的显示名称
+                    "&coord_type=gcj02");//坐标 （百度同样支持他自己的db0911的坐标，但是高德和腾讯不支持）
+            Intent intent = new Intent();
+            intent.setPackage(BAIDUMAP_PACKAGENAME);
+            intent.setData(uri);
+
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+    }
+
+    /**
+     * 调用高德地图
+     *
+     * @param context 上下文对象s
+     * @param arg     经纬度参数map
+     */
+    private static void invokeAuToNaveMap(Context context, Map arg) {
+
+        try {
+            Uri uri = Uri.parse("androidamap://route?sourceApplication={com.ysl.myapplication}" +
+                    "&dlat=" + arg.get(GCJO2_LAT)//终点的纬度
+                    + "&dlon=" + arg.get(GCJO2_LNG)//终点的经度
+                    + "&dname=" + arg.get(DESTINATION)//终点的显示名称
+                    + "&dev=0&m=0&t=0");
+            Intent intent = new Intent("android.intent.action.VIEW", uri);
+            intent.addCategory("android.intent.category.DEFAULT");
+
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+    }
+
+    /**
+     * 调用腾讯地图
+     *
+     * @param context 上下文对象s
+     * @param arg     经纬度参数map
+     */
+    private static void invokeQQMap(Context context, Map arg) {
+        try {
+            Uri uri = Uri.parse("qqmap://map/routeplan?type=drive" +
+                    "&to=" + arg.get(DESTINATION)//终点的显示名称 必要参数
+                    + "&tocoord=" + arg.get(GCJO2_LAT) + "," + arg.get(GCJO2_LNG)//终点的经纬度
+                    + "&referer={com.ysl.myapplication}");
+            Intent intent = new Intent();
+            intent.setData(uri);
+
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    private static final String[] MAP_PACKAGES = {BAIDUMAP_PACKAGENAME, AUTONAVI_PACKAGENAME, QQMAP_PACKAGENAME};
+    /**
+     * 检查手机上是否安装了指定的软件
+     *
+     * @param packageNames 可变参数 String[]
+     * @return 目标软件中已安装的列表
+     */
+    public static List<String> checkInstalledPackage(Context sContext, String... packageNames) {
+        //获取packageManager
+        final PackageManager packageManager = sContext.getPackageManager();
+        //获取所有已安装程序的包信息
+        List<PackageInfo> packageInfos = packageManager.getInstalledPackages(0);
+        //用于存储
+        List<String> newPackageNames = new ArrayList<>();
+        int count = packageNames.length;
+
+        if (packageInfos != null && packageInfos.size() > 0) {
+
+            outermost:for (String packageName : packageNames) {
+                for (int i = 0; i < packageInfos.size(); i++) {
+                    String packageInfo = packageInfos.get(i).packageName;
+                    if (packageInfo.contains(packageName)) {
+                        newPackageNames.add(packageName);
+                        if (newPackageNames.size() == count) {
+                            break outermost;//这里使用了循环标记，跳出外层循环
+                        }
+                    }
+                }
+            }
+        }
+        //判断packageNames中是否有目标程序的包名，有TRUE，没有FALSE
+        return newPackageNames;
+    }
+
+}

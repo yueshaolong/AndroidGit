@@ -1,6 +1,9 @@
 package com.ysl;
 
 import android.app.Application;
+import android.content.Context;
+
+import androidx.multidex.MultiDex;
 
 public class App extends Application {
 
@@ -14,5 +17,9 @@ public class App extends Application {
 //        HookUtil.hookStartAct();
 //        HookUtil.hookHander();
     }
-
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
 }
