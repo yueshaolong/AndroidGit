@@ -58,8 +58,13 @@ public class Go2MapActivity extends AppCompatActivity {
             for (String packageName : packages) {
                 switch (packageName) {
                     case AUTONAVI_PACKAGENAME:
-                        arg.put(GCJO2_LNG,"116.39752865");
-                        arg.put(GCJO2_LAT,"39.90873221");
+//                        arg.put(GCJO2_LNG,"116.39752865");
+//                        arg.put(GCJO2_LAT,"39.90873221");
+                        arg.put(GCJO2_LNG,"113.26924183333334");
+                        arg.put(GCJO2_LAT,"34.805176");
+                        double[] doubles = GPSUtil.gps84_To_Gcj02(34.805176, 113.26924183333334);
+                        arg.put(GCJO2_LNG,doubles[1]+"");
+                        arg.put(GCJO2_LAT,doubles[0]+"");
                         invokeAuToNaveMap(this, arg);
                         return;
                     case QQMAP_PACKAGENAME:
@@ -223,5 +228,40 @@ public class Go2MapActivity extends AppCompatActivity {
             e1.printStackTrace();
         }
         return s;
+    }
+    /**
+     * 字符串转换成为16进制(无需Unicode编码)
+     * @param str
+     * @return
+     */
+    public static String str2HexStr(String str) {
+//        char[] chars = "0123456789ABCDEF".toCharArray();
+        char[] chars = "0123456789abcdef".toCharArray();
+        StringBuilder sb = new StringBuilder("");
+        byte[] bs = str.getBytes();
+        int bit;
+        for (int i = 0; i < bs.length; i++) {
+            bit = (bs[i] & 0x0f0) >> 4;
+            sb.append(chars[bit]);
+            bit = bs[i] & 0x0f;
+            sb.append(chars[bit]);
+            // sb.append(' ');
+        }
+        return sb.toString().trim();
+    }
+    public void addition_isCorrect() {
+//        System.out.println(hexStringToString("31313331312e3331373136"));
+//        String s = hexStringToString("31313331312e3331373136");
+        System.out.println(hexStringToString("333935392e363239333900"));
+        String s = hexStringToString("333935392e363239333900");
+        int i = s.indexOf(".");
+        String s1 = s.substring(0, i - 2);
+        String s2 = s.substring(i - 2);
+        System.out.println(s1+"----"+s2);
+        System.out.println(Integer.parseInt(s1)+Double.parseDouble(s2)/60.0f);
+
+        System.out.println(str2HexStr("你好"));
+        System.out.println(hexStr2Str("e4bda0e5a5bd"));
+        System.out.println(hexStringToString("e4bda0e5a5bd"));
     }
 }
