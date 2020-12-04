@@ -55,8 +55,8 @@ public class Go2MapActivity extends AppCompatActivity {
         } else {
             Map<String, String> arg = new HashMap();
             arg.put(DESTINATION,"天安门");
-            for (String packageName : packages) {
-                switch (packageName) {
+            if(packages.size() == 1){
+                switch (packages.get(0)) {
                     case AUTONAVI_PACKAGENAME:
 //                        arg.put(GCJO2_LNG,"116.39752865");
 //                        arg.put(GCJO2_LAT,"39.90873221");
@@ -66,18 +66,61 @@ public class Go2MapActivity extends AppCompatActivity {
                         arg.put(GCJO2_LNG,doubles[1]+"");
                         arg.put(GCJO2_LAT,doubles[0]+"");
                         invokeAuToNaveMap(this, arg);
-                        return;
+                        break;
                     case QQMAP_PACKAGENAME:
                         arg.put(GCJO2_LNG,"116.39752865");
                         arg.put(GCJO2_LAT,"39.90873221");
                         invokeQQMap(this, arg);
-                        return;
+                        break;
                     case BAIDUMAP_PACKAGENAME:
                         arg.put(GCJO2_LNG,"116.39752865");
                         arg.put(GCJO2_LAT,"39.90873221");
                         invokeBaiDuMap(this, arg);
-                        return;
+                        break;
                 }
+            }else {
+                ActionSheetDialog actionSheetDialog = new ActionSheetDialog(Go2MapActivity.this)
+                        .builder()
+                        .setCancelable(false)
+                        .setCanceledOnTouchOutside(false);
+                for (String aPackage : packages) {
+                    switch (aPackage) {
+                        case AUTONAVI_PACKAGENAME:
+                            actionSheetDialog.addSheetItem("高德地图", ActionSheetDialog.SheetItemColor.Blue,
+                                    which ->{
+                                        //                        arg.put(GCJO2_LNG,"116.39752865");
+                                        //                        arg.put(GCJO2_LAT,"39.90873221");
+                                        arg.put(GCJO2_LNG,"113.26924183333334");
+                                        arg.put(GCJO2_LAT,"34.805176");
+                                        double[] doubles = GPSUtil.gps84_To_Gcj02(34.805176, 113.26924183333334);
+                                        arg.put(GCJO2_LNG,doubles[1]+"");
+                                        arg.put(GCJO2_LAT,doubles[0]+"");
+                                        invokeAuToNaveMap(this, arg);
+                                    }
+                            );
+                            break;
+                        case BAIDUMAP_PACKAGENAME:
+                            actionSheetDialog.addSheetItem("百度地图", ActionSheetDialog.SheetItemColor.Blue,
+                                    which ->{
+                                        arg.put(GCJO2_LNG,"116.39752865");
+                                        arg.put(GCJO2_LAT,"39.90873221");
+                                        invokeBaiDuMap(this, arg);
+                                    }
+                            );
+                            break;
+                        case QQMAP_PACKAGENAME:
+                            actionSheetDialog.addSheetItem("腾讯地图", ActionSheetDialog.SheetItemColor.Blue,
+                                which ->{
+                                    arg.put(GCJO2_LNG,"116.39752865");
+                                    arg.put(GCJO2_LAT,"39.90873221");
+                                    invokeQQMap(this, arg);
+                                }
+                            );
+                            break;
+                    }
+
+                }
+                actionSheetDialog.show();
             }
         }
     }
