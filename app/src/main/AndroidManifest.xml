@@ -87,13 +87,16 @@
 
         </activity>
         <activity android:name="com.ysl.ditu.Go2MapActivity">
+
+        </activity>
+        <activity android:name="com.ysl.chajian.ProxyActivity" />
+        <activity android:name="com.ysl.ditu.FrameAnimationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.ysl.chajian.ProxyActivity" />
     </application>
 
 </manifest>
