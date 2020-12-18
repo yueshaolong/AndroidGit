@@ -91,6 +91,9 @@
         </activity>
         <activity android:name="com.ysl.chajian.ProxyActivity" />
         <activity android:name="com.ysl.ditu.FrameAnimationActivity">
+
+        </activity>
+        <activity android:name="com.ysl.jieping.JiePingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
